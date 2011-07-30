@@ -14,6 +14,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 
 public class PowerExperiments extends Activity {
@@ -22,6 +23,7 @@ public class PowerExperiments extends Activity {
 	
 	CheckBox checkPartialWakeLock;
 	CheckBox checkGps;
+	EditText editGpsDelay;
 	CheckBox checkGpsBeep;
 	Button buttonKill;
 	
@@ -48,6 +50,7 @@ public class PowerExperiments extends Activity {
     void attachUiEvents() {
     	checkPartialWakeLock = (CheckBox)findViewById(R.id.check_partial_wakelock);
     	checkGps = (CheckBox)findViewById(R.id.check_gps);
+    	editGpsDelay = (EditText)findViewById(R.id.edit_gps_delay);
     	checkGpsBeep = (CheckBox)findViewById(R.id.check_gps_beep);
     	buttonKill = (Button)findViewById(R.id.button_kill);
     	
@@ -63,10 +66,12 @@ public class PowerExperiments extends Activity {
 
     	checkGps.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			public void onCheckedChanged(CompoundButton view, boolean checked) {
-				if (checked)
-					locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, gpsListener);					
-				else
+				if (checked) {
+					long delay = Long.parseLong(editGpsDelay.getText().toString());
+					locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, delay, 0, gpsListener);					
+				} else {
 					locationManager.removeUpdates(gpsListener);
+				}
 			}
 		});
     	

@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/linearLayout1" android:layout_width="fill_parent" android:weightSum="1" android:layout_height="fill_parent" android:orientation="vertical">
     <CheckBox android:id="@+id/check_partial_wakelock" android:text="Partial WakeLock" android:layout_height="wrap_content" android:layout_weight="0.20" android:layout_width="180dp"></CheckBox>
-    <LinearLayout android:id="@+id/linearLayout2" android:layout_height="wrap_content" android:layout_width="match_parent" android:weightSum="1" android:layout_weight="0.74">
-        <CheckBox android:id="@+id/check_gps" android:text="GPS" android:layout_width="wrap_content" android:layout_weight="0.92" android:layout_height="122dp"></CheckBox>
+    <LinearLayout android:id="@+id/linearLayout2" android:layout_height="wrap_content" android:layout_width="match_parent" android:weightSum="1" android:layout_weight="0.12">
+        <CheckBox android:id="@+id/check_gps" android:text="GPS" android:layout_height="122dp" android:layout_width="wrap_content" android:layout_weight="0.30"></CheckBox>
+        <EditText android:id="@+id/edit_gps_delay" android:text="1000" android:layout_height="wrap_content" android:layout_width="wrap_content" android:inputType="number" android:layout_weight="0.40">
+        </EditText>
+        <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:id="@+id/textView1" android:layout_height="wrap_content" android:text="Delay" android:layout_width="wrap_content" android:layout_weight="0.22"></TextView>
         <CheckBox android:id="@+id/check_gps_beep" android:text="Beep" android:layout_width="wrap_content" android:layout_gravity="right" android:layout_height="122dp"></CheckBox>
     </LinearLayout>
     <Button android:id="@+id/button_kill" android:layout_height="wrap_content" android:text="Kill" android:layout_width="92dp"></Button>
