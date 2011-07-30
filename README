@@ -1,0 +1,5 @@
+App to toggle various power-consuming features in Android.
+
+Does not contain any power measurement code, try using hardware described in http://www.cl.cam.ac.uk/~acr31/pubs/rice-power.pdf for it.
+
+This is one-off "research quality" code, not intended to be maintained after the experiments. Use at your own risk.
