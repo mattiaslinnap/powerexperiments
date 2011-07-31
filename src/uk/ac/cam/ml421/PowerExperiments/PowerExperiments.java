@@ -2,6 +2,8 @@ package uk.ac.cam.ml421.PowerExperiments;
 
 import android.app.Activity;
 import android.content.Context;
+import android.hardware.Camera;
+import android.hardware.Camera.Parameters;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -10,6 +12,7 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -25,12 +28,14 @@ public class PowerExperiments extends Activity {
 	CheckBox checkGps;
 	EditText editGpsDelay;
 	CheckBox checkGpsBeep;
+	CheckBox checkFlash;
+	CheckBox checkBright;
 	Button buttonKill;
 	
 	PowerManager powerManager;
 	LocationManager locationManager;
 	WakeLock partialWakeLock;
-	
+	Camera camera;
 	MediaPlayer beepPlayer;
 	
     @Override
@@ -42,6 +47,7 @@ public class PowerExperiments extends Activity {
         locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
         partialWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
     	partialWakeLock.setReferenceCounted(false);
+    	camera = null;
     	beepPlayer = MediaPlayer.create(this, R.raw.beep2);        
         
         attachUiEvents();
@@ -52,6 +58,8 @@ public class PowerExperiments extends Activity {
     	checkGps = (CheckBox)findViewById(R.id.check_gps);
     	editGpsDelay = (EditText)findViewById(R.id.edit_gps_delay);
     	checkGpsBeep = (CheckBox)findViewById(R.id.check_gps_beep);
+    	checkFlash = (CheckBox)findViewById(R.id.check_flash);
+    	checkBright = (CheckBox)findViewById(R.id.check_bright);
     	buttonKill = (Button)findViewById(R.id.button_kill);
     	
     	checkPartialWakeLock.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -72,6 +80,33 @@ public class PowerExperiments extends Activity {
 				} else {
 					locationManager.removeUpdates(gpsListener);
 				}
+			}
+		});
+    	
+    	checkFlash.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			public void onCheckedChanged(CompoundButton view, boolean checked) {
+				if (camera != null) {
+					Parameters params = camera.getParameters();
+					params.setFlashMode(Parameters.FLASH_MODE_OFF);
+					camera.setParameters(params);
+					camera.release();
+					camera = null;
+				}				
+				
+				if (checked) {
+					camera = Camera.open();
+					Parameters params = camera.getParameters();
+					params.setFlashMode(Parameters.FLASH_MODE_TORCH);
+					camera.setParameters(params);
+				}
+			}
+		});
+    	
+    	checkBright.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			public void onCheckedChanged(CompoundButton view, boolean checked) {
+				WindowManager.LayoutParams params = getWindow().getAttributes();
+				params.screenBrightness = checked ? 1.0f : 0.1f;
+				getWindow().setAttributes(params);
 			}
 		});
     	
