@@ -26,20 +26,12 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Toast;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 
 public class PowerExperiments extends Activity {
     
 	public static final String TAG = "PowerExperiments";
-	
-	CheckBox checkPartialWakeLock;
-	CheckBox checkGps;
-	EditText editGpsDelay;
-	CheckBox checkGpsBeep;
-	CheckBox checkFlash;
-	CheckBox checkBright;
-	CheckBox checkGyro;
-	Button buttonKill;
 	
 	PowerManager powerManager;
 	LocationManager locationManager;
@@ -47,6 +39,7 @@ public class PowerExperiments extends Activity {
 	WakeLock partialWakeLock;
 	Camera camera;
 	MediaPlayer beepPlayer;
+	CpuSpinner cpuSpinner;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -67,16 +60,9 @@ public class PowerExperiments extends Activity {
     }
     
     void attachUiEvents() {
-    	checkPartialWakeLock = (CheckBox)findViewById(R.id.check_partial_wakelock);
-    	checkGps = (CheckBox)findViewById(R.id.check_gps);
-    	editGpsDelay = (EditText)findViewById(R.id.edit_gps_delay);
-    	checkGpsBeep = (CheckBox)findViewById(R.id.check_gps_beep);
-    	checkFlash = (CheckBox)findViewById(R.id.check_flash);
-    	checkBright = (CheckBox)findViewById(R.id.check_bright);
-    	checkGyro = (CheckBox)findViewById(R.id.check_gyro);
-    	buttonKill = (Button)findViewById(R.id.button_kill);
-    	
-    	checkPartialWakeLock.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+    	final Activity me = this;
+
+    	((CheckBox)findViewById(R.id.check_partial_wakelock)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			public void onCheckedChanged(CompoundButton view, boolean checked) {
 				if (checked)
 					partialWakeLock.acquire();
@@ -86,10 +72,10 @@ public class PowerExperiments extends Activity {
 			}
 		});
 
-    	checkGps.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+    	((CheckBox)findViewById(R.id.check_gps)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			public void onCheckedChanged(CompoundButton view, boolean checked) {
 				if (checked) {
-					long delay = Long.parseLong(editGpsDelay.getText().toString());
+					long delay = Long.parseLong(((EditText)findViewById(R.id.edit_gps_delay)).getText().toString());
 					locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, delay, 0, gpsListener);					
 				} else {
 					locationManager.removeUpdates(gpsListener);
@@ -97,24 +83,46 @@ public class PowerExperiments extends Activity {
 			}
 		});
     	
-    	checkFlash.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+    	((CheckBox)findViewById(R.id.check_camera)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			public void onCheckedChanged(CompoundButton view, boolean checked) {
 				if (checked) {
-					camera = Camera.open();
-					Parameters params = camera.getParameters();
-					params.setFlashMode(Parameters.FLASH_MODE_TORCH);
-					camera.setParameters(params);
+					if (camera == null) {
+						camera = Camera.open();
+						if (Build.MANUFACTURER.equalsIgnoreCase("samsung"))
+							camera.startPreview();
+					} else {
+						Toast.makeText(me, "Camera already open", Toast.LENGTH_SHORT).show();
+					}
 				} else {
-					Parameters params = camera.getParameters();
-					params.setFlashMode(Parameters.FLASH_MODE_OFF);
-					camera.setParameters(params);
-					camera.release();
-					camera = null;
+					if (camera != null) {
+						camera.release();
+						camera = null;
+					} else {
+						Toast.makeText(me, "Camera already closed", Toast.LENGTH_SHORT).show();
+					}
 				}
 			}
 		});
     	
-    	checkBright.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+    	((CheckBox)findViewById(R.id.check_flash)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			public void onCheckedChanged(CompoundButton view, boolean checked) {
+				if (camera == null) {
+					Toast.makeText(me, "No open camera", Toast.LENGTH_SHORT).show();
+				} else {				
+					if (checked) {
+						Parameters params = camera.getParameters();
+						params.setFlashMode(Parameters.FLASH_MODE_TORCH);
+						camera.setParameters(params);
+					} else {
+						Parameters params = camera.getParameters();
+						params.setFlashMode(Parameters.FLASH_MODE_OFF);
+						camera.setParameters(params);
+					}
+				}
+			}
+		});
+    	
+    	((CheckBox)findViewById(R.id.check_bright)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			public void onCheckedChanged(CompoundButton view, boolean checked) {
 				WindowManager.LayoutParams params = getWindow().getAttributes();
 				params.screenBrightness = checked ? 1.0f : 0.1f;
@@ -122,19 +130,24 @@ public class PowerExperiments extends Activity {
 			}
 		});
     	
-    	checkGyro.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+    	addSensorEvents((CheckBox)findViewById(R.id.check_accel), Sensor.TYPE_ACCELEROMETER, "No accelerometer", accelListener);
+    	addSensorEvents((CheckBox)findViewById(R.id.check_gyro), Sensor.TYPE_GYROSCOPE, "No gyroscope", gyroListener);
+    	
+    	((CheckBox)findViewById(R.id.check_cpu)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			public void onCheckedChanged(CompoundButton view, boolean checked) {
+				if (cpuSpinner != null) {
+					cpuSpinner.quit = true;
+					cpuSpinner = null;
+				}
+				
 				if (checked) {
-					List<Sensor> gyros = sensorManager.getSensorList(Sensor.TYPE_GYROSCOPE);
-					Log.i(TAG, "There are " + gyros.size() + " gyros.");
-					sensorManager.registerListener(sensorListener, gyros.get(0), SensorManager.SENSOR_DELAY_FASTEST);
-				} else {
-					sensorManager.unregisterListener(sensorListener);
+					cpuSpinner = new CpuSpinner();
+					cpuSpinner.start();
 				}
 			}
 		});
     	
-    	buttonKill.setOnClickListener(new OnClickListener() {
+    	((Button)findViewById(R.id.button_kill)).setOnClickListener(new OnClickListener() {
 			public void onClick(View view) {
 				finish();
 				System.exit(0);
@@ -142,21 +155,51 @@ public class PowerExperiments extends Activity {
 		});
     }    
     
+    void addSensorEvents(CheckBox check, final int sensorType, final String failureToast, final SensorEventListener listener) {
+    	final Activity me = this;
+    	check.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			public void onCheckedChanged(CompoundButton view, boolean checked) {
+				if (checked) {
+					List<Sensor> sensors = sensorManager.getSensorList(sensorType);
+					if (sensors.size() == 0)
+						Toast.makeText(me, failureToast, Toast.LENGTH_SHORT).show();
+					else
+						sensorManager.registerListener(listener, sensors.get(0), SensorManager.SENSOR_DELAY_FASTEST);
+				} else {
+					sensorManager.unregisterListener(listener);
+				}
+			}
+		});
+    }
+    
     LocationListener gpsListener = new LocationListener() {
 		public void onStatusChanged(String provider, int status, Bundle extras) {}
 		public void onProviderEnabled(String provider) {}
 		public void onProviderDisabled(String provider) {}		
 		public void onLocationChanged(Location location) {
-			if (checkGpsBeep.isChecked()) {
+			if (((CheckBox)findViewById(R.id.check_gps_beep)).isChecked()) {
 				beep();
 			}
 		}
 	};
 	
-	SensorEventListener sensorListener = new SensorEventListener() {
+	SensorEventListener accelListener = new SensorEventListener() {
 		public void onSensorChanged(SensorEvent event) {}
 		public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 	};
+	
+	SensorEventListener gyroListener = new SensorEventListener() {
+		public void onSensorChanged(SensorEvent event) {}
+		public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+	};
+	
+	class CpuSpinner extends Thread {
+		volatile boolean quit = false;
+		
+		public void run() {			
+			while (!quit);
+		}
+	}
 	
 	public void beep() {
 		beepPlayer.start();

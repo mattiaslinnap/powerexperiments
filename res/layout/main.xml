@@ -1,15 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/linearLayout1" android:layout_width="fill_parent" android:weightSum="1" android:layout_height="fill_parent" android:orientation="vertical">
-    <CheckBox android:id="@+id/check_partial_wakelock" android:text="Partial WakeLock" android:layout_width="180dp" android:layout_height="wrap_content"></CheckBox>
-    <LinearLayout android:id="@+id/linearLayout2" android:layout_width="match_parent" android:weightSum="1" android:layout_height="80dp">
-        <CheckBox android:id="@+id/check_gps" android:text="GPS" android:layout_height="122dp" android:layout_width="wrap_content" android:layout_weight="0.30"></CheckBox>
-        <EditText android:id="@+id/edit_gps_delay" android:text="1000" android:layout_height="wrap_content" android:layout_width="wrap_content" android:inputType="number" android:layout_weight="0.40">
-        </EditText>
-        <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:id="@+id/textView1" android:layout_height="wrap_content" android:text="Delay" android:layout_width="wrap_content" android:layout_weight="0.22"></TextView>
-        <CheckBox android:id="@+id/check_gps_beep" android:text="Beep" android:layout_width="wrap_content" android:layout_gravity="right" android:layout_height="122dp"></CheckBox>
-    </LinearLayout>
-    <CheckBox android:layout_height="wrap_content" android:text="Flashlight" android:id="@+id/check_flash" android:layout_width="wrap_content" android:layout_weight="0.29"></CheckBox>
-    <CheckBox android:layout_height="wrap_content" android:text="Screen Bright" android:id="@+id/check_bright" android:layout_width="wrap_content" android:layout_weight="0.12"></CheckBox>
-    <CheckBox android:layout_height="wrap_content" android:text="Gyro" android:id="@+id/check_gyro" android:layout_width="wrap_content" android:layout_weight="0.20"></CheckBox>
-    <Button android:id="@+id/button_kill" android:layout_height="wrap_content" android:text="Kill" android:layout_width="92dp"></Button>
-</LinearLayout>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:stretchColumns="1">
+    
+    <TableRow>
+    	<LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content">
+    	    <CheckBox android:id="@+id/check_gps" android:text="GPS" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginRight="10dp"></CheckBox>    	    
+	        <EditText android:id="@+id/edit_gps_delay" android:text="1000" android:inputType="number" android:layout_width="wrap_content" android:layout_height="wrap_content"></EditText>
+	        <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:text="Delay" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginRight="10dp"></TextView>
+        </LinearLayout>
+        <CheckBox android:id="@+id/check_gps_beep" android:text="Beep"></CheckBox>
+    </TableRow>
+
+    <TableRow>
+        <CheckBox android:id="@+id/check_partial_wakelock" android:text="Partial WakeLock"></CheckBox>
+    </TableRow>
+    
+    <TableRow>
+    	<CheckBox android:id="@+id/check_camera" android:text="Camera"></CheckBox>
+    	<CheckBox android:id="@+id/check_flash" android:text="Flashlight"></CheckBox>
+    </TableRow>
+    
+    <TableRow>
+    	<CheckBox android:id="@+id/check_bright" android:text="Screen Bright" android:checked="true"></CheckBox>
+    </TableRow>
+    
+    <TableRow>
+    	<CheckBox android:id="@+id/check_accel" android:text="Accel"></CheckBox>
+    </TableRow>
+    
+    <TableRow>
+    	<CheckBox android:id="@+id/check_gyro" android:text="Gyro"></CheckBox>
+    </TableRow>
+    
+    <TableRow>
+    	<CheckBox android:id="@+id/check_cpu" android:text="CPU"></CheckBox>
+    </TableRow>
+    
+    <TableRow>
+    	<Button android:id="@+id/button_kill" android:text="Kill" android:layout_marginTop="50dp"></Button>    	
+    </TableRow>
+</TableLayout>
