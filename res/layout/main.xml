@@ -39,6 +39,10 @@
     </TableRow>
     
     <TableRow>
+    	<Button android:id="@+id/button_wifi" android:text="WiFi Scan"></Button>    	
+    </TableRow>
+    
+    <TableRow>
     	<Button android:id="@+id/button_kill" android:text="Kill" android:layout_marginTop="50dp"></Button>    	
     </TableRow>
 </TableLayout>

@@ -14,6 +14,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.MediaPlayer;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
@@ -36,6 +37,7 @@ public class PowerExperiments extends Activity {
 	PowerManager powerManager;
 	LocationManager locationManager;
 	SensorManager sensorManager;
+	WifiManager wifiManager;
 	WakeLock partialWakeLock;
 	Camera camera;
 	MediaPlayer beepPlayer;
@@ -51,6 +53,7 @@ public class PowerExperiments extends Activity {
         powerManager = (PowerManager)getSystemService(Context.POWER_SERVICE);
         locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
         sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
+        wifiManager = (WifiManager)getSystemService(Context.WIFI_SERVICE);
         partialWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
     	partialWakeLock.setReferenceCounted(false);
     	camera = null;
@@ -146,6 +149,13 @@ public class PowerExperiments extends Activity {
 				}
 			}
 		});
+    	
+    	((Button)findViewById(R.id.button_wifi)).setOnClickListener(new OnClickListener() {
+			public void onClick(View view) {
+				if (!wifiManager.startScan())
+					Toast.makeText(me, "Failed to start scan", Toast.LENGTH_SHORT).show();
+			}
+    	});
     	
     	((Button)findViewById(R.id.button_kill)).setOnClickListener(new OnClickListener() {
 			public void onClick(View view) {
