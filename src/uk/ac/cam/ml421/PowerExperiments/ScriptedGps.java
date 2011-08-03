@@ -32,9 +32,8 @@ public class ScriptedGps extends Thread {
 		wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
 		wakeLock.setReferenceCounted(false);
 		wakeLock.acquire();
-	
-		System.gc();
-		System.runFinalization();
+
+		systemCleanup();
 	
 		activity.setInfo("Starting script");
 		
@@ -55,6 +54,8 @@ public class ScriptedGps extends Thread {
 					timingLog.logEvent("gpsend");
 					Thread.sleep(20000);
 				}
+				
+				systemCleanup();
 			}
 			timingLog.close();			
 		} catch (Exception e) {
@@ -75,6 +76,12 @@ public class ScriptedGps extends Thread {
 		lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0.0f, gpsListener);
 		Thread.sleep(delay);
 		lm.removeUpdates(gpsListener);
+	}
+	
+	void systemCleanup() {
+		ProcessKiller.killUselessBackgroundServices(activity);
+		System.gc();
+		System.runFinalization();
 	}
 	
 	LocationListener gpsListener = new LocationListener() {

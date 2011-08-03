@@ -19,6 +19,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.os.Vibrator;
 import android.os.PowerManager.WakeLock;
 import android.util.Log;
 import android.view.View;
@@ -39,6 +40,7 @@ public class PowerExperiments extends Activity {
 	PowerManager powerManager;
 	LocationManager locationManager;
 	SensorManager sensorManager;
+	Vibrator vibrator;
 	WifiManager wifiManager;
 	WakeLock partialWakeLock;
 	Camera camera;
@@ -58,6 +60,7 @@ public class PowerExperiments extends Activity {
         powerManager = (PowerManager)getSystemService(Context.POWER_SERVICE);
         locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
         sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
+        vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
         wifiManager = (WifiManager)getSystemService(Context.WIFI_SERVICE);
         partialWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
     	partialWakeLock.setReferenceCounted(false);
@@ -146,6 +149,15 @@ public class PowerExperiments extends Activity {
     	
     	addSensorEvents((CheckBox)findViewById(R.id.check_accel), Sensor.TYPE_ACCELEROMETER, "No accelerometer", accelListener);
     	addSensorEvents((CheckBox)findViewById(R.id.check_gyro), Sensor.TYPE_GYROSCOPE, "No gyroscope", gyroListener);
+    	
+    	((CheckBox)findViewById(R.id.check_vibrator)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
+    		public void onCheckedChanged(CompoundButton view, boolean checked) {
+    			if (checked)
+    				vibrator.vibrate(60000);
+    			else
+    				vibrator.cancel();
+    		}
+    	});
     	
     	((CheckBox)findViewById(R.id.check_cpu)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			public void onCheckedChanged(CompoundButton view, boolean checked) {

@@ -31,6 +31,7 @@
     
     <TableRow>
     	<CheckBox android:id="@+id/check_accel" android:text="Accel"></CheckBox>
+    	<CheckBox android:id="@+id/check_vibrator" android:text="Vibrator"></CheckBox>
     </TableRow>
     
     <TableRow>
