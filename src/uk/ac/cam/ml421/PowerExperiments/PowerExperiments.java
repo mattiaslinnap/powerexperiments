@@ -17,6 +17,7 @@ import android.media.MediaPlayer;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.util.Log;
@@ -27,6 +28,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 
@@ -42,13 +44,16 @@ public class PowerExperiments extends Activity {
 	Camera camera;
 	MediaPlayer beepPlayer;
 	CpuSpinner cpuSpinner;
+	ScriptedGps scriptedGps;
+	TextView textInfo;
+	Handler handler = new Handler();
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
-        logDeviceInfo();        
+        //logDeviceInfo();        
         
         powerManager = (PowerManager)getSystemService(Context.POWER_SERVICE);
         locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
@@ -57,13 +62,14 @@ public class PowerExperiments extends Activity {
         partialWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
     	partialWakeLock.setReferenceCounted(false);
     	camera = null;
-    	beepPlayer = MediaPlayer.create(this, R.raw.beep2);        
+    	beepPlayer = MediaPlayer.create(this, R.raw.beep2);
+    	textInfo = (TextView)findViewById(R.id.text_info);
         
         attachUiEvents();
     }
     
     void attachUiEvents() {
-    	final Activity me = this;
+    	final PowerExperiments me = this;
 
     	((CheckBox)findViewById(R.id.check_partial_wakelock)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			public void onCheckedChanged(CompoundButton view, boolean checked) {
@@ -91,6 +97,11 @@ public class PowerExperiments extends Activity {
 				if (checked) {
 					if (camera == null) {
 						camera = Camera.open();
+						Parameters params = camera.getParameters();
+						params.setFocusMode(Parameters.FOCUS_MODE_INFINITY);
+						params.setAntibanding(Parameters.ANTIBANDING_OFF);
+						camera.setParameters(params);
+						
 						if (Build.MANUFACTURER.equalsIgnoreCase("samsung"))
 							camera.startPreview();
 					} else {
@@ -157,10 +168,25 @@ public class PowerExperiments extends Activity {
 			}
     	});
     	
+    	((Button)findViewById(R.id.button_script)).setOnClickListener(new OnClickListener() {
+			public void onClick(View view) {
+				scriptedGps = new ScriptedGps(me);
+				Log.i(TAG, "GPS Script starting...");
+				//scriptedGps.run();  // run in UI thread.
+				scriptedGps.start();
+			}
+    	});
+    	
     	((Button)findViewById(R.id.button_kill)).setOnClickListener(new OnClickListener() {
 			public void onClick(View view) {
 				finish();
 				System.exit(0);
+			}
+		});
+    	
+    	((Button)findViewById(R.id.button_beep)).setOnClickListener(new OnClickListener() {
+			public void onClick(View view) {
+				beep();
 			}
 		});
     }    
@@ -215,6 +241,14 @@ public class PowerExperiments extends Activity {
 		beepPlayer.start();
 	}
 	
+	public void setInfo(final String message) {
+		handler.post(new Runnable() {
+			public void run() {
+				textInfo.setText(message);
+			}
+		});
+	}
+	
 	public void logDeviceInfo() {
 		Log.i(TAG, "Build board: " + Build.BOARD);
         Log.i(TAG, "Build brand: " + Build.BRAND);
@@ -229,7 +263,10 @@ public class PowerExperiments extends Activity {
         for (int i = 0; i < cameras; ++i) {
         	Camera cam = Camera.open(i);
         	Parameters params = cam.getParameters();
-        	Log.i(TAG, "Camera " + i + " flash modes: " + params.getSupportedFlashModes());
+        	Log.i(TAG, "Camera " + i + " flash modes: " + params.getSupportedFlashModes() + ", currently " + params.getFlashMode());
+        	Log.i(TAG, "Camera " + i + " focus modes: " + params.getSupportedFocusModes() + ", currently " + params.getFocusMode());
+        	Log.i(TAG, "Camera " + i + " white balance modes: " + params.getSupportedWhiteBalance() + ", currently " + params.getWhiteBalance());
+        	Log.i(TAG, "Camera " + i + " antibanding modes: " + params.getSupportedAntibanding() + ", currently " + params.getAntibanding());
         	cam.release();
         	cam = null;
         }
