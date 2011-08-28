@@ -18,6 +18,12 @@
 
     <TableRow>
         <CheckBox android:id="@+id/check_partial_wakelock" android:text="Partial WakeLock"></CheckBox>
+        <Button android:id="@+id/button_delete_agps" android:text="Del AGPS"></Button>
+    </TableRow>
+    
+    <TableRow>
+        <CheckBox android:id="@+id/check_wifilock" android:text="WiFi Lock"></CheckBox>
+        <Button android:id="@+id/button_wifi" android:text="WiFi Scan"></Button>
     </TableRow>
     
     <TableRow>
@@ -27,6 +33,7 @@
     
     <TableRow>
     	<CheckBox android:id="@+id/check_bright" android:text="Screen Bright" android:checked="true"></CheckBox>
+    	<Button android:id="@+id/button_killprocess" android:text="Kill Procs"></Button>
     </TableRow>
     
     <TableRow>
@@ -36,14 +43,11 @@
     
     <TableRow>
     	<CheckBox android:id="@+id/check_gyro" android:text="Gyro"></CheckBox>
-    </TableRow>
-    
-    <TableRow>
     	<CheckBox android:id="@+id/check_cpu" android:text="CPU"></CheckBox>
     </TableRow>
-    
-    <TableRow>
-    	<Button android:id="@+id/button_wifi" android:text="WiFi Scan"></Button>
+        
+    <TableRow>    	
+    	<Button android:id="@+id/button_fixscript" android:text="GPS Script Fixes"></Button>
     	<Button android:id="@+id/button_script" android:text="GPS Script"></Button>
     </TableRow>
     

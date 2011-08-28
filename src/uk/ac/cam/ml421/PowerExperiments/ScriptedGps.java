@@ -1,6 +1,8 @@
 package uk.ac.cam.ml421.PowerExperiments;
 
 import android.content.Context;
+import android.hardware.Camera;
+import android.hardware.Camera.Parameters;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -14,6 +16,7 @@ public class ScriptedGps extends Thread {
 	
 	public static final String TAG = PowerExperiments.TAG;
 	
+	public static final boolean PULSE_CAMERA = false;
 	public static final int NUM_LOOPS = 10;
 	public static final int GPS_PER_LOOP = 3;
 	
@@ -43,9 +46,7 @@ public class ScriptedGps extends Thread {
 				timingLog.logEvent("loop" + loop);
 				
 				Thread.sleep(5000);
-				timingLog.logEvent("spinstart");
-				spinSleep(5000);
-				timingLog.logEvent("spinend");
+				insertPulse();
 				Thread.sleep(10000);
 				
 				for (int gps = 0; gps < GPS_PER_LOOP; ++gps) {
@@ -64,6 +65,31 @@ public class ScriptedGps extends Thread {
 		}
 		wakeLock.release();
 		activity.beep();
+	}
+	
+	void insertPulse() throws InterruptedException {
+		if (PULSE_CAMERA) {
+			Camera camera = Camera.open();
+			Thread.sleep(1000);
+			
+			Parameters params = camera.getParameters();
+			params.setFlashMode(Parameters.FLASH_MODE_TORCH);			
+			camera.setParameters(params);
+			timingLog.logEvent("spinstart");			
+			Thread.sleep(5000);
+			timingLog.logEvent("spinend");			
+			params = camera.getParameters();
+			params.setFlashMode(Parameters.FLASH_MODE_OFF);			
+			camera.setParameters(params);
+			
+			Thread.sleep(1000);
+			camera.release();
+			camera = null;
+		} else {
+			timingLog.logEvent("spinstart");
+			spinSleep(5000);
+			timingLog.logEvent("spinend");
+		}
 	}
 	
 	void spinSleep(long delay) {

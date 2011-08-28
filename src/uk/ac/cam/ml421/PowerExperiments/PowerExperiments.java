@@ -15,6 +15,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.MediaPlayer;
 import android.net.wifi.WifiManager;
+import android.net.wifi.WifiManager.WifiLock;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -43,10 +44,12 @@ public class PowerExperiments extends Activity {
 	Vibrator vibrator;
 	WifiManager wifiManager;
 	WakeLock partialWakeLock;
+	WifiLock wifiLock;
 	Camera camera;
 	MediaPlayer beepPlayer;
 	CpuSpinner cpuSpinner;
 	ScriptedGps scriptedGps;
+	ScriptedGpsWaitingForFixes scriptedGpsWaitingForFixes;
 	TextView textInfo;
 	Handler handler = new Handler();
 	
@@ -64,6 +67,8 @@ public class PowerExperiments extends Activity {
         wifiManager = (WifiManager)getSystemService(Context.WIFI_SERVICE);
         partialWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
     	partialWakeLock.setReferenceCounted(false);
+    	wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL, TAG);
+    	wifiLock.setReferenceCounted(false);
     	camera = null;
     	beepPlayer = MediaPlayer.create(this, R.raw.beep2);
     	textInfo = (TextView)findViewById(R.id.text_info);
@@ -80,6 +85,24 @@ public class PowerExperiments extends Activity {
 					partialWakeLock.acquire();
 				else
 					partialWakeLock.release();
+				beep();
+			}
+		});
+    	
+    	((Button)findViewById(R.id.button_delete_agps)).setOnClickListener(new OnClickListener() {
+			public void onClick(View view) {
+				if (!locationManager.sendExtraCommand(LocationManager.GPS_PROVIDER, "delete_aiding_data", null)) {
+					Toast.makeText(me, "Delete failed!", Toast.LENGTH_SHORT).show();
+				}
+			}
+    	});
+    	
+    	((CheckBox)findViewById(R.id.check_wifilock)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			public void onCheckedChanged(CompoundButton view, boolean checked) {
+				if (checked)
+					wifiLock.acquire();
+				else
+					wifiLock.release();
 				beep();
 			}
 		});
@@ -180,6 +203,14 @@ public class PowerExperiments extends Activity {
 			}
     	});
     	
+    	((Button)findViewById(R.id.button_fixscript)).setOnClickListener(new OnClickListener() {
+			public void onClick(View view) {
+				scriptedGpsWaitingForFixes = new ScriptedGpsWaitingForFixes(me);
+				Log.i(TAG, "GPS Script with fixes starting...");
+				scriptedGpsWaitingForFixes.startScript();
+			}
+    	});
+    	
     	((Button)findViewById(R.id.button_script)).setOnClickListener(new OnClickListener() {
 			public void onClick(View view) {
 				scriptedGps = new ScriptedGps(me);
@@ -193,6 +224,12 @@ public class PowerExperiments extends Activity {
 			public void onClick(View view) {
 				finish();
 				System.exit(0);
+			}
+		});
+    	
+    	((Button)findViewById(R.id.button_killprocess)).setOnClickListener(new OnClickListener() {
+			public void onClick(View view) {
+				ProcessKiller.killUselessBackgroundServices(me);
 			}
 		});
     	
@@ -212,7 +249,7 @@ public class PowerExperiments extends Activity {
 					if (sensors.size() == 0)
 						Toast.makeText(me, failureToast, Toast.LENGTH_SHORT).show();
 					else
-						sensorManager.registerListener(listener, sensors.get(0), SensorManager.SENSOR_DELAY_FASTEST);
+						sensorManager.registerListener(listener, sensors.get(0), SensorManager.SENSOR_DELAY_NORMAL);
 				} else {
 					sensorManager.unregisterListener(listener);
 				}
