@@ -34,6 +34,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 
+
 public class PowerExperiments extends Activity {
     
 	public static final String TAG = "PowerExperiments";
@@ -306,18 +307,19 @@ public class PowerExperiments extends Activity {
         Log.i(TAG, "Build manufacturer: " + Build.MANUFACTURER);
         Log.i(TAG, "Build model: " + Build.MODEL);
         Log.i(TAG, "Build product: " + Build.PRODUCT);
-        
-        int cameras = Camera.getNumberOfCameras();
-        Log.i(TAG, "Number of cameras: " + Camera.getNumberOfCameras());
-        for (int i = 0; i < cameras; ++i) {
-        	Camera cam = Camera.open(i);
-        	Parameters params = cam.getParameters();
-        	Log.i(TAG, "Camera " + i + " flash modes: " + params.getSupportedFlashModes() + ", currently " + params.getFlashMode());
-        	Log.i(TAG, "Camera " + i + " focus modes: " + params.getSupportedFocusModes() + ", currently " + params.getFocusMode());
-        	Log.i(TAG, "Camera " + i + " white balance modes: " + params.getSupportedWhiteBalance() + ", currently " + params.getWhiteBalance());
-        	Log.i(TAG, "Camera " + i + " antibanding modes: " + params.getSupportedAntibanding() + ", currently " + params.getAntibanding());
-        	cam.release();
-        	cam = null;
-        }
+                
+        // Not on Android 2.2
+//        int cameras = Camera.getNumberOfCameras();
+//        Log.i(TAG, "Number of cameras: " + Camera.getNumberOfCameras());
+//        for (int i = 0; i < cameras; ++i) {
+//        	Camera cam = Camera.open(i);
+//        	Parameters params = cam.getParameters();
+//        	Log.i(TAG, "Camera " + i + " flash modes: " + params.getSupportedFlashModes() + ", currently " + params.getFlashMode());
+//        	Log.i(TAG, "Camera " + i + " focus modes: " + params.getSupportedFocusModes() + ", currently " + params.getFocusMode());
+//        	Log.i(TAG, "Camera " + i + " white balance modes: " + params.getSupportedWhiteBalance() + ", currently " + params.getWhiteBalance());
+//        	Log.i(TAG, "Camera " + i + " antibanding modes: " + params.getSupportedAntibanding() + ", currently " + params.getAntibanding());
+//        	cam.release();
+//        	cam = null;
+//        }
 	}
 }
