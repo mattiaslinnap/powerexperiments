@@ -53,6 +53,8 @@ public class PowerExperiments extends Activity {
 	ScriptedGpsWaitingForFixes scriptedGpsWaitingForFixes;
 	TextView textInfo;
 	Handler handler = new Handler();
+	int accelEventCounter;
+	long latestAccelTimestamp;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -245,14 +247,22 @@ public class PowerExperiments extends Activity {
     	final Activity me = this;
     	check.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			public void onCheckedChanged(CompoundButton view, boolean checked) {
+				Log.d(TAG, "checked " + checked);
 				if (checked) {
 					List<Sensor> sensors = sensorManager.getSensorList(sensorType);
-					if (sensors.size() == 0)
+					if (sensors.size() == 0) {
 						Toast.makeText(me, failureToast, Toast.LENGTH_SHORT).show();
-					else
-						sensorManager.registerListener(listener, sensors.get(0), SensorManager.SENSOR_DELAY_NORMAL);
+					} else {
+						if (sensorType == Sensor.TYPE_ACCELEROMETER) {
+							accelEventCounter = 0;
+							latestAccelTimestamp = 0;
+						}
+						sensorManager.registerListener(listener, sensorManager.getDefaultSensor(sensorType), SensorManager.SENSOR_DELAY_FASTEST);
+					}
 				} else {
 					sensorManager.unregisterListener(listener);
+					if (sensorType == Sensor.TYPE_ACCELEROMETER)
+						Toast.makeText(me, "Accel events: " + accelEventCounter, Toast.LENGTH_LONG).show();
 				}
 			}
 		});
@@ -270,7 +280,14 @@ public class PowerExperiments extends Activity {
 	};
 	
 	SensorEventListener accelListener = new SensorEventListener() {
-		public void onSensorChanged(SensorEvent event) {}
+		public void onSensorChanged(SensorEvent event) {
+			++accelEventCounter;
+			long millisSinceLast = (event.timestamp - latestAccelTimestamp) / 1000000;
+			if (millisSinceLast > 5000) {
+				latestAccelTimestamp = event.timestamp;
+				beep();
+			}
+		}
 		public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 	};
 	
